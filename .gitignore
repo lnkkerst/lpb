@@ -1,1 +1,4 @@
 /target
+
+/prisma/db
+/src/db.rs

@@ -1,0 +1,14 @@
+generator client {
+  provider = "cargo prisma"
+  output   = "../src/db.rs"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:db/sqlite.db"
+}
+
+model Paste {
+  id      String @unique @default(uuid())
+  content String
+}
