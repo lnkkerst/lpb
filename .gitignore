@@ -2,3 +2,5 @@
 
 /prisma/db
 /src/db.rs
+
+.env.local

@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:db/sqlite.db"
+  url      = env("DATABASE_URL")
 }
 
 model Paste {
