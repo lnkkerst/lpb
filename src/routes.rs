@@ -75,8 +75,15 @@ async fn create_paste(
                 }
             };
 
+            let proto = {
+                match headers.get("X-Forwarded-Proto") {
+                    Some(val) => val.to_str().unwrap_or("http"),
+                    None => "http",
+                }
+            };
+
             return Ok(Json(
-                json!({"paste_id": paste_id, "url": format!("http://{}/r/{}", host, paste_id)}),
+                json!({"paste_id": paste_id, "url": format!("{}://{}/r/{}", proto, host, paste_id)}),
             ));
         }
     }
