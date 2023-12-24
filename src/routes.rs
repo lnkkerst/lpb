@@ -1,6 +1,6 @@
 use axum::{
     extract::{Multipart, Path},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     routing, Extension, Json, Router,
 };
 use rand::{thread_rng, Rng};
@@ -34,7 +34,11 @@ struct PasteCreatePayload {
     file: String,
 }
 
-async fn create_paste(db: Database, mut payload: Multipart) -> Result<Json<Value>, StatusCode> {
+async fn create_paste(
+    db: Database,
+    headers: HeaderMap,
+    mut payload: Multipart,
+) -> Result<Json<Value>, StatusCode> {
     while let Some(field) = payload.next_field().await.unwrap() {
         let name = field.name().ok_or(StatusCode::BAD_REQUEST)?.to_string();
         let data = field
@@ -64,7 +68,16 @@ async fn create_paste(db: Database, mut payload: Multipart) -> Result<Json<Value
                 .await
                 .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-            return Ok(Json(json!({"paste_id": paste_id})));
+            let host = {
+                match headers.get("Host") {
+                    Some(val) => val.to_str().unwrap_or(""),
+                    None => "",
+                }
+            };
+
+            return Ok(Json(
+                json!({"paste_id": paste_id, "url": format!("http://{}/r/{}", host, paste_id)}),
+            ));
         }
     }
 
