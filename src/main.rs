@@ -6,11 +6,20 @@ mod routes;
 
 use dotenv::dotenv;
 use std::env;
+use tokio::signal;
 
 #[tokio::main]
 async fn main() {
     dotenv::from_filename(".env.local").ok();
     dotenv().ok();
+
+    let mut term = signal::unix::signal(signal::unix::SignalKind::terminate())
+        .expect("Failed to register SIGTERM handler");
+
+    tokio::spawn(async move {
+        term.recv().await;
+        std::process::exit(0);
+    });
 
     let host = env::var("HOST").unwrap_or("127.0.0.1".to_string());
     let port = env::var("PORT").unwrap_or("8000".to_string());
