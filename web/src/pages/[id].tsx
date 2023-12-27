@@ -63,7 +63,7 @@ export default function Paste() {
 
   const Content = () => {
     if (error) {
-      return <div>Failed to load params with id {params[0]}</div>;
+      return <div>Failed to load paste with id {params[0]}</div>;
     }
 
     if (isLoading || !data) {
