@@ -1,6 +1,37 @@
 import { useParams } from '@/router';
 import useSWR from 'swr';
 import { getHighlighter, setCDN, type Lang } from 'shiki';
+import { Container, IconButton } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
+import { useState } from 'react';
+import styles from './[id].module.scss';
+
+type CopyButtonProps = {
+  value: string;
+};
+function CopyButton({ value }: CopyButtonProps) {
+  const [success, setSuccess] = useState(false);
+  const handleClick = () => {
+    if (value) {
+      navigator.clipboard.writeText(value);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
+  };
+
+  return (
+    <IconButton
+      onClick={e => {
+        e.preventDefault();
+        handleClick();
+      }}
+      size="large"
+    >
+      {success ? <CheckIcon /> : <ContentCopyIcon />}
+    </IconButton>
+  );
+}
 
 export default function Paste() {
   const params = useParams('/:id').id.split('.');
@@ -24,20 +55,36 @@ export default function Paste() {
         return result;
       };
 
-      return await highlightCode(await res.text());
+      const raw = await res.text();
+
+      return { raw, html: await highlightCode(raw) };
     }
   );
 
-  if (error) {
-    return <div>Failed to load params with id {params[0]}</div>;
-  }
-  if (isLoading || !data) {
-    return <div>Loading...</div>;
-  }
+  const Content = () => {
+    if (error) {
+      return <div>Failed to load params with id {params[0]}</div>;
+    }
+
+    if (isLoading || !data) {
+      return <div>Loading...</div>;
+    }
+
+    return (
+      <div
+        className={styles.code}
+        dangerouslySetInnerHTML={{ __html: data.html }}
+      ></div>
+    );
+  };
 
   return (
-    <div className="font-mono">
-      <pre dangerouslySetInnerHTML={{ __html: data }} />
-    </div>
+    <Container className="relative! my-4">
+      <div className="absolute right-2 top-2">
+        <CopyButton value={data?.raw ?? ''}></CopyButton>
+      </div>
+
+      <Content />
+    </Container>
   );
 }

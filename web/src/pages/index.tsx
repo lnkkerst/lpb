@@ -1,10 +1,38 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Lang, getLanguages } from '@/utils/languages';
+import {
+  Autocomplete,
+  Button,
+  Container,
+  FormControl,
+  TextField
+} from '@mui/material';
+
+type LanguageSelectProps = {
+  onUpdate: (value: Lang) => void;
+  value: Lang;
+};
+function LanguageSelect({ onUpdate, value }: LanguageSelectProps) {
+  const languages = useMemo(getLanguages, []);
+
+  return (
+    <Autocomplete
+      value={value}
+      onChange={(_, val) => onUpdate((val || 'plaintext') as Lang)}
+      options={languages}
+      renderInput={params => (
+        <TextField {...params} label="Language"></TextField>
+      )}
+    ></Autocomplete>
+  );
+}
 
 export default function Index() {
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [link, setLink] = useState('');
+  const [lang, setLang] = useState<Lang>('plaintext');
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -12,39 +40,52 @@ export default function Index() {
     formDate.append('file', content);
     const res = await fetch('/r', { method: 'POST', body: formDate });
     if (res.status.toString().startsWith('2')) {
-      setLink((await res.json()).paste_id);
+      let pasteId = (await res.json()).paste_id;
+      if (lang != 'plaintext') {
+        pasteId = `${pasteId}.${lang}`;
+      }
+      setLink(pasteId);
     }
     setSubmitting(false);
   };
 
   return (
-    <div>
-      <textarea
-        value={content}
-        onChange={e => setContent(e.target.value)}
-        className="w-full h-64 font-mono"
-      ></textarea>
+    <Container className="mt-4 mb-4">
+      <FormControl fullWidth>
+        <LanguageSelect value={lang} onUpdate={val => setLang(val)} />
 
-      <div className="mx-auto flex flex-col w-fit">
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="px-2 py-1 mt-2 ring-2 rounded ring-black hover:opacity-70 active:opacity-50 cursor-pointer"
-        >
-          Submit
-        </button>
+        <TextField
+          className="my-4!"
+          inputProps={{
+            className: 'font-mono!'
+          }}
+          multiline
+          minRows={10}
+          value={content}
+          onChange={e => setContent(e.target.value)}
+        ></TextField>
 
-        {link ? (
-          <Link
-            className="text-center mt-2 hover:opacity-70 active:opacity-50"
-            to={`/${link}`}
+        <div className="mx-auto flex flex-col w-fit">
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={submitting}
           >
-            link
-          </Link>
-        ) : (
-          ''
-        )}
-      </div>
-    </div>
+            Submit
+          </Button>
+
+          {link ? (
+            <Link
+              className="text-center mt-2 hover:opacity-70 active:opacity-50"
+              to={`/${link}`}
+            >
+              {`ID: ${link}`}
+            </Link>
+          ) : (
+            ''
+          )}
+        </div>
+      </FormControl>
+    </Container>
   );
 }
