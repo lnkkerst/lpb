@@ -1,6 +1,6 @@
 import { useParams } from '@/router';
 import useSWR from 'swr';
-import { getHighlighter, setCDN, type Lang } from 'shiki';
+import { type Lang } from 'shiki';
 import { Container, IconButton } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
@@ -44,6 +44,8 @@ export default function Paste() {
       }
 
       const highlightCode = async (code: string) => {
+        const { setCDN, getHighlighter } = await import('shiki');
+
         setCDN('https://fastly.jsdelivr.net/npm/shiki');
 
         const highlighter = await getHighlighter({
