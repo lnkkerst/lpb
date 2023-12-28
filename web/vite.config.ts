@@ -3,10 +3,11 @@ import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react-swc';
 import generouted from '@generouted/react-router/plugin';
 import unocss from '@unocss/vite';
+import mdx from '@mdx-js/rollup';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), generouted(), unocss()],
+  plugins: [{ enforce: 'pre', ...mdx() }, react(), generouted(), unocss()],
   server: {
     proxy: {
       '/r': { target: 'http://localhost:3000' }

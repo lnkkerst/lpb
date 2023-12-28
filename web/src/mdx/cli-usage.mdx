@@ -1,0 +1,39 @@
+## CLI Usage
+
+### Quick Start
+
+Create a new paste from the stdout of command:
+
+```bash
+echo "hello world" | curl -F "file=@-" "https://pb.lnkkerst.me/"
+# {"paste_id":"bpaB4","url":"https://pb.lnkkerst.me/r/bpaB4"}
+```
+
+Get a paste by ID:
+
+```bash
+curl "https://pb.lnkkerst.me/r/bpaB4"
+# hello world
+```
+
+### Examples
+
+Create and upload kernel messages using `dmesg`:
+
+```bash
+dmesg | curl -F "file=@-" "https://pb.lnkkerst.me/"
+```
+
+Command alias:
+
+```bash
+alias lpb='curl -s -F "file=@-" "https://pb.lnkkerst.me/" | jq -r .url'
+echo "hello world" | lpb
+# https://pb.lnkkerst.me/r/TuD8e
+```
+
+Create and upload a recording using `asciinema`:
+
+```
+asciinema rec - | lpb
+```

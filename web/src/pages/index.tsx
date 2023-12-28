@@ -8,6 +8,7 @@ import {
   FormControl,
   TextField
 } from '@mui/material';
+import CliUsage from '@/mdx/cli-usage.mdx';
 
 type LanguageSelectProps = {
   onUpdate: (value: Lang) => void;
@@ -60,7 +61,7 @@ export default function Index() {
             className: 'font-mono!'
           }}
           multiline
-          minRows={10}
+          minRows={16}
           value={content}
           onChange={e => setContent(e.target.value)}
         ></TextField>
@@ -86,6 +87,10 @@ export default function Index() {
           )}
         </div>
       </FormControl>
+
+      <div className="prose">
+        <CliUsage />
+      </div>
     </Container>
   );
 }
