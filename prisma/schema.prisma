@@ -8,7 +8,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id             String  @unique @default(uuid())
+  email          String  @unique
+  hashedPassword String
+  pastes         Paste[]
+}
+
 model Paste {
-  id      String @unique @default(uuid())
-  content String
+  id        String   @unique @default(uuid())
+  content   String
+  lang      String?
+  createdAt DateTime @default(now())
+  expiresIn Int?
+  encrypted Boolean  @default(false)
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 }

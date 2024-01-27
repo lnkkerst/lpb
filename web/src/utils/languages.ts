@@ -456,3 +456,17 @@ export const getLanguages = () => [
   'zig',
   'plaintext'
 ];
+
+export const highlightCode = async (code: string, lang: Lang) => {
+  const { setCDN, getHighlighter } = await import('shiki');
+
+  setCDN('https://fastly.jsdelivr.net/npm/shiki');
+
+  const highlighter = await getHighlighter({
+    theme: 'github-light',
+    langs: lang === 'plaintext' ? [] : [lang]
+  });
+
+  const result = highlighter.codeToHtml(code, lang);
+  return result;
+};

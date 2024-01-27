@@ -1,11 +1,13 @@
 import { useParams } from '@/router';
 import useSWR from 'swr';
-import { type Lang } from 'shiki';
-import { Container, IconButton } from '@mui/material';
+import { Button, Container, IconButton, TextField } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import styles from './[id].module.scss';
+import { Lang, highlightCode } from '@/utils/languages';
+import AES from 'crypto-js/aes';
+import Utf8 from 'crypto-js/enc-utf8';
 
 type CopyButtonProps = {
   value: string;
@@ -33,8 +35,31 @@ function CopyButton({ value }: CopyButtonProps) {
   );
 }
 
+type PasswordFormProps = {
+  onDecrypt: (password: string) => void;
+};
+
+function PasswordForm({ onDecrypt }: PasswordFormProps) {
+  const [password, setPassword] = useState('');
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <TextField
+        label="Password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+      ></TextField>
+
+      <Button onClick={() => onDecrypt(password)}>DECRYPT</Button>
+    </div>
+  );
+}
+
 export default function Paste() {
   const params = useParams('/:id').id.split('.');
+  const [html, setHtml] = useState('');
+  const [encrypted, setEncrypted] = useState(false);
+  const [code, setCode] = useState('');
+
   const { data, error, isLoading } = useSWR(
     `/r/${params[0]}`,
     async (...args) => {
@@ -43,25 +68,33 @@ export default function Paste() {
         throw new Error(res.status.toString());
       }
 
-      const highlightCode = async (code: string) => {
-        const { setCDN, getHighlighter } = await import('shiki');
-
-        setCDN('https://fastly.jsdelivr.net/npm/shiki');
-
-        const highlighter = await getHighlighter({
-          theme: 'github-light',
-          langs: params[1] ? [params[1] as Lang] : []
-        });
-
-        const result = highlighter.codeToHtml(code, params[1]);
-        return result;
-      };
-
       const raw = await res.text();
 
-      return { raw, html: await highlightCode(raw) };
+      const encrypted = res.headers.get('x-encrypted') === 'true';
+
+      setEncrypted(encrypted);
+      setCode(raw);
+
+      return {
+        raw
+      };
     }
   );
+
+  useEffect(() => {
+    highlightCode(code, (params[1] as Lang) ?? 'plaintext').then(res =>
+      setHtml(res)
+    );
+  }, [code, params]);
+
+  function handleDecrypt(password: string) {
+    if (!encrypted) {
+      return;
+    }
+
+    setCode(AES.decrypt(code, password).toString(Utf8));
+    setEncrypted(false);
+  }
 
   const Content = () => {
     if (error) {
@@ -75,18 +108,26 @@ export default function Paste() {
     return (
       <div
         className={styles.code}
-        dangerouslySetInnerHTML={{ __html: data.html }}
+        dangerouslySetInnerHTML={{ __html: html }}
       ></div>
     );
   };
 
   return (
     <Container className="relative! my-4">
-      <div className="absolute right-2 top-2">
-        <CopyButton value={data?.raw ?? ''}></CopyButton>
-      </div>
+      {!encrypted ? (
+        <Fragment>
+          <div className="absolute right-2 top-2">
+            <CopyButton value={data?.raw ?? ''}></CopyButton>
+          </div>
 
-      <Content />
+          <Content />
+        </Fragment>
+      ) : (
+        <PasswordForm
+          onDecrypt={password => handleDecrypt(password)}
+        ></PasswordForm>
+      )}
     </Container>
   );
 }
