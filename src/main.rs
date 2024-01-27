@@ -3,6 +3,7 @@ mod db;
 mod error;
 mod handlers;
 mod routes;
+mod utils;
 
 use dotenv::dotenv;
 use std::env;
