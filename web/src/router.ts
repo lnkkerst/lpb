@@ -1,12 +1,12 @@
 // Generouted, changes to this file will be overriden
 /* eslint-disable */
 
-import { components, hooks, utils } from '@generouted/react-router/client';
+import { components, hooks, utils } from "@generouted/react-router/client";
 
 export type Path = `/` | `/:id`;
 
 export type Params = {
-  '/:id': { id: string };
+  "/:id": { id: string };
 };
 
 export type ModalPath = never;

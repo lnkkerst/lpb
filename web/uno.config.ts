@@ -1,14 +1,14 @@
 import {
   defineConfig,
-  presetUno,
+  presetAttributify,
   presetIcons,
   presetTagify,
-  presetWebFonts,
   presetTypography,
-  presetAttributify,
+  presetUno,
+  presetWebFonts,
   transformerAttributifyJsx,
-  transformerDirectives
-} from 'unocss';
+  transformerDirectives,
+} from "unocss";
 
 export default defineConfig({
   presets: [
@@ -17,12 +17,12 @@ export default defineConfig({
     presetTagify(),
     presetWebFonts({
       fonts: {
-        provider: 'google',
-        mono: ['JetBrains Mono', 'monospace']
-      }
+        provider: "google",
+        mono: ["JetBrains Mono", "monospace"],
+      },
     }),
     presetTypography(),
-    presetAttributify()
+    presetAttributify(),
   ],
-  transformers: [transformerDirectives(), transformerAttributifyJsx()]
+  transformers: [transformerDirectives(), transformerAttributifyJsx()],
 });

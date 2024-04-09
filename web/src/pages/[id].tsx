@@ -1,13 +1,13 @@
-import { useParams } from '@/router';
-import useSWR from 'swr';
-import { Button, Container, IconButton, TextField } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import { Fragment, useEffect, useState } from 'react';
-import styles from './[id].module.scss';
-import { Lang, highlightCode } from '@/utils/languages';
-import AES from 'crypto-js/aes';
-import Utf8 from 'crypto-js/enc-utf8';
+import { useParams } from "@/router";
+import { highlightCode, Lang } from "@/utils/languages";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { Button, Container, IconButton, TextField } from "@mui/material";
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
+import { Fragment, useEffect, useState } from "react";
+import useSWR from "swr";
+import styles from "./[id].module.scss";
 
 type CopyButtonProps = {
   value: string;
@@ -40,14 +40,15 @@ type PasswordFormProps = {
 };
 
 function PasswordForm({ onDecrypt }: PasswordFormProps) {
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   return (
     <div className="flex flex-col items-center gap-2">
       <TextField
         label="Password"
         value={password}
         onChange={e => setPassword(e.target.value)}
-      ></TextField>
+      >
+      </TextField>
 
       <Button onClick={() => onDecrypt(password)}>DECRYPT</Button>
     </div>
@@ -55,34 +56,34 @@ function PasswordForm({ onDecrypt }: PasswordFormProps) {
 }
 
 export default function Paste() {
-  const params = useParams('/:id').id.split('.');
-  const [html, setHtml] = useState('');
+  const params = useParams("/:id").id.split(".");
+  const [html, setHtml] = useState("");
   const [encrypted, setEncrypted] = useState(false);
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
 
   const { data, error, isLoading } = useSWR(
     `/r/${params[0]}`,
     async (...args) => {
       const res = await fetch(...args);
-      if (!res.status.toString().startsWith('2')) {
+      if (!res.status.toString().startsWith("2")) {
         throw new Error(res.status.toString());
       }
 
       const raw = await res.text();
 
-      const encrypted = res.headers.get('x-encrypted') === 'true';
+      const encrypted = res.headers.get("x-encrypted") === "true";
 
       setEncrypted(encrypted);
       setCode(raw);
 
       return {
-        raw
+        raw,
       };
-    }
+    },
   );
 
   useEffect(() => {
-    highlightCode(code, (params[1] as Lang) ?? 'plaintext').then(res =>
+    highlightCode(code, (params[1] as Lang) ?? "plaintext").then(res =>
       setHtml(res)
     );
   }, [code, params]);
@@ -109,25 +110,29 @@ export default function Paste() {
       <div
         className={styles.code}
         dangerouslySetInnerHTML={{ __html: html }}
-      ></div>
+      >
+      </div>
     );
   };
 
   return (
     <Container className="relative! my-4">
-      {!encrypted ? (
-        <Fragment>
-          <div className="absolute right-2 top-2">
-            <CopyButton value={data?.raw ?? ''}></CopyButton>
-          </div>
+      {!encrypted
+        ? (
+          <Fragment>
+            <div className="absolute right-2 top-2">
+              <CopyButton value={data?.raw ?? ""}></CopyButton>
+            </div>
 
-          <Content />
-        </Fragment>
-      ) : (
-        <PasswordForm
-          onDecrypt={password => handleDecrypt(password)}
-        ></PasswordForm>
-      )}
+            <Content />
+          </Fragment>
+        )
+        : (
+          <PasswordForm
+            onDecrypt={password => handleDecrypt(password)}
+          >
+          </PasswordForm>
+        )}
     </Container>
   );
 }

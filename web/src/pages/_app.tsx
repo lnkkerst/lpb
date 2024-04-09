@@ -1,11 +1,11 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { AppBar, Box, InputBase, Toolbar, Typography } from '@mui/material';
-import { useState } from 'react';
+import { AppBar, Box, InputBase, Toolbar, Typography } from "@mui/material";
+import { useState } from "react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function Search() {
-  const host = window.location.host + '/';
+  const host = window.location.host + "/";
   const navigate = useNavigate();
-  const [id, setId] = useState('');
+  const [id, setId] = useState("");
 
   return (
     <form
